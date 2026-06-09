@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🧉 Matecito</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --verde:     #2d6a2d;
+      --verde-mid: #3d8b3d;
+      --verde-claro: #c8e6c9;
+      --crema:     #f5f0e8;
+      --marron:    #5c3d1e;
+      --marron-claro: #a0704a;
+      --texto:     #1a1a1a;
+      --gris:      #888;
+      --sombra:    rgba(0,0,0,0.15);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--crema);
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── PANTALLA DE ROL ── */
+    #pantalla-rol {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .titulo-principal {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 10vw, 6rem);
+      color: var(--verde);
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    .subtitulo {
+      font-size: 1rem;
+      color: var(--gris);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .mate-emoji {
+      font-size: 5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .pregunta-rol {
+      font-size: 1.1rem;
+      color: var(--marron);
+      font-weight: 500;
+    }
+
+    .botones-rol {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-rol {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.06em;
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 4px 0 var(--sombra);
+    }
+
+    .btn-rol:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--sombra); }
+
+    .btn-cebador {
+      background: var(--verde);
+      color: #fff;
+    }
+    .btn-cebador:hover { background: var(--verde-mid); }
+
+    .btn-tomador {
+      background: var(--marron);
+      color: #fff;
+    }
+    .btn-tomador:hover { background: var(--marron-claro); }
+
+    .ocupado-msg {
+      font-size: 0.85rem;
+      color: #c0392b;
+      min-height: 1.2em;
+    }
+
+    /* ── PANTALLA PRINCIPAL ── */
+    #pantalla-main {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem;
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .header-main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .titulo-main {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem;
+      color: var(--verde);
+      letter-spacing: 0.04em;
+    }
+
+    .badge-rol {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.8rem;
+      border-radius: 99px;
+      color: #fff;
+    }
+    .badge-rol.cebador { background: var(--verde); }
+    .badge-rol.tomador  { background: var(--marron); }
+
+    /* Estado conexión */
+    .estado-conexion {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--gris);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      transition: background 0.4s;
+    }
+    .dot.online  { background: #27ae60; }
+    .dot.offline { background: #e74c3c; }
+
+    /* Botón acción */
+    .btn-accion {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.06em;
+      padding: 1.4rem 3rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s;
+      box-shadow: 0 5px 0 var(--sombra);
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .btn-accion:active  { transform: translateY(3px); box-shadow: 0 2px 0 var(--sombra); }
+    .btn-accion:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-accion.cebador-btn { background: var(--marron); color: #fff; }
+    .btn-accion.tomador-btn { background: var(--verde);  color: #fff; }
+
+    /* Feedback */
+    .feedback {
+      font-size: 0.95rem;
+      color: var(--gris);
+      min-height: 1.4em;
+      font-style: italic;
+    }
+
+    /* Alerta entrante */
+    #alerta-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #alerta-overlay.visible { display: flex; }
+
+    .alerta-box {
+      background: var(--crema);
+      border-radius: 12px;
+      padding: 2.5rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: pop 0.25s ease;
+      max-width: 320px;
+      width: 90%;
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+
+    .alerta-emoji { font-size: 4rem; }
+
+    .alerta-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: var(--verde);
+      margin: 0.5rem 0 0.3rem;
+      letter-spacing: 0.04em;
+    }
+
+    .alerta-desc { font-size: 0.9rem; color: var(--gris); }
+
+    .btn-cerrar-alerta {
+      margin-top: 1.5rem;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      padding: 0.6rem 2rem;
+      border: none;
+      border-radius: 4px;
+      background: var(--verde);
+      color: #fff;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+
+    /* salir */
+    .btn-salir {
+      font-size: 0.75rem;
+      color: var(--gris);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- PANTALLA ELEGIR ROL -->
+<div id="pantalla-rol">
+  <div class="mate-emoji">🧉</div>
+  <div class="titulo-principal">Matecito</div>
+  <div class="subtitulo">Sistema de control de la ronda</div>
+  <p class="pregunta-rol">¿Quién sos hoy?</p>
+  <div class="botones-rol">
+    <button class="btn-rol btn-cebador" onclick="elegirRol('cebador')">☕ Cebador</button>
+    <button class="btn-rol btn-tomador" onclick="elegirRol('tomador')">🤲 Tomador</button>
+  </div>
+  <p class="ocupado-msg" id="msg-ocupado"></p>
+</div>
+
+<!-- PANTALLA PRINCIPAL -->
+<div id="pantalla-main">
+  <div class="header-main">
+    <div class="titulo-main">🧉 Matecito</div>
+    <span class="badge-rol" id="badge-rol-texto"></span>
+  </div>
+
+  <div class="estado-conexion">
+    <div class="dot" id="dot-otro"></div>
+    <span id="label-otro">Esperando al otro...</span>
+  </div>
+
+  <button class="btn-accion" id="btn-principal" onclick="enviarSenal()" disabled>
+    —
+  </button>
+
+  <p class="feedback" id="feedback-texto"></p>
+
+  <button class="btn-salir" onclick="salir()">Cambiar rol</button>
+</div>
+
+<!-- ALERTA ENTRANTE -->
+<div id="alerta-overlay">
+  <div class="alerta-box">
+    <div class="alerta-emoji" id="alerta-emoji"></div>
+    <div class="alerta-titulo" id="alerta-titulo"></div>
+    <div class="alerta-desc"  id="alerta-desc"></div>
+    <button class="btn-cerrar-alerta" onclick="cerrarAlerta()">OK</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }               from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAioW2B5miHw_lUeEFDuNf4vzHBA3uQq-c",
+    authDomain:        "mate-la-casa-radio.firebaseapp.com",
+    databaseURL:       "https://mate-la-casa-radio-default-rtdb.firebaseio.com",
+    projectId:         "mate-la-casa-radio",
+    storageBucket:     "mate-la-casa-radio.firebasestorage.app",
+    messagingSenderId: "643168991405",
+    appId:             "1:643168991405:web:94a52f0e377156b8bb6e24"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  let miRol = null;
+
+  // ── Sonidos generados con Web Audio API ──
+  const audioCtx = () => new (window.AudioContext || window.webkitAudioContext)();
+
+  function sonidoCebado() {
+    const ctx = audioCtx();
+    // Agua vertida: ruido filtrado que sube y baja
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 1.8, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(800, ctx.currentTime);
+    filter.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.8);
+    filter.frequency.linearRampToValueAtTime(600, ctx.currentTime + 1.8);
+    filter.Q.value = 1.5;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 0.15);
+    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 1.2);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.8);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+    src.stop(ctx.currentTime + 1.8);
+  }
+
+  function sonidoBocina() {
+    const ctx = audioCtx();
+    const dur = 1.6;
+    // Bocina: dos osciladores desafinados + modulación
+    [220, 277].forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + dur - 0.15);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + dur);
+    });
+  }
+
+  // ── Roles en Firebase ──
+  const rolesRef    = ref(db, "roles");
+  const senalRef    = ref(db, "senal");
+
+  window.elegirRol = async function(rol) {
+    // Leer roles actuales
+    onValue(rolesRef, snap => {}, { onlyOnce: false }); // primer ping
+    const snapshot = await new Promise(res => onValue(rolesRef, res, { onlyOnce: true }));
+    const roles = snapshot.val() || {};
+
+    const opuesto = rol === "cebador" ? "tomador" : "cebador";
+    if (roles[rol]) {
+      document.getElementById("msg-ocupado").textContent =
+        `El rol "${rol}" ya está ocupado. Esperá o elegí el otro.`;
+      return;
+    }
+
+    // Registrar mi rol
+    await set(ref(db, `roles/${rol}`), true);
+    miRol = rol;
+
+    // Limpiar al cerrar/recargar
+    window.addEventListener("beforeunload", () => set(ref(db, `roles/${miRol}`), null));
+
+    mostrarPantallaMain();
+    escucharOtro();
+    escucharSenal();
+  };
+
+  function mostrarPantallaMain() {
+    document.getElementById("pantalla-rol").style.display  = "none";
+    document.getElementById("pantalla-main").style.display = "flex";
+
+    const badge = document.getElementById("badge-rol-texto");
+    badge.textContent = miRol === "cebador" ? "☕ Cebador" : "🤲 Tomador";
+    badge.className   = `badge-rol ${miRol}`;
+
+    const btn = document.getElementById("btn-principal");
+    if (miRol === "cebador") {
+      btn.textContent = "🚛 Devolveme el mate";
+      btn.className   = "btn-accion cebador-btn";
+    } else {
+      btn.textContent = "🧉 Pedir mate";
+      btn.className   = "btn-accion tomador-btn";
+    }
+  }
+
+  function escucharOtro() {
+    const opuesto = miRol === "cebador" ? "tomador" : "cebador";
+    onValue(ref(db, `roles/${opuesto}`), snap => {
+      const online = !!snap.val();
+      document.getElementById("dot-otro").className  = `dot ${online ? "online" : "offline"}`;
+      document.getElementById("label-otro").textContent = online
+        ? `${opuesto.charAt(0).toUpperCase() + opuesto.slice(1)} conectado ✓`
+        : `Esperando al ${opuesto}...`;
+      document.getElementById("btn-principal").disabled = !online;
+    });
+  }
+
+  function escucharSenal() {
+    onValue(senalRef, snap => {
+      const data = snap.val();
+      if (!data || data.para !== miRol) return;
+
+      // Consumir la señal
+      remove(senalRef);
+
+      if (data.tipo === "pedir") {
+        // Le llega al cebador: el tomador pidió mate
+        sonidoCebado();
+        mostrarAlerta("🧉", "¡A cebar!", "El tomador está esperando el mate.");
+      } else if (data.tipo === "devolver") {
+        // Le llega al tomador: el cebador reclama
+        sonidoBocina();
+        mostrarAlerta("🚛", "¡Devolvé el mate!", "El cebador quiere la pava de vuelta.");
+      }
+    });
+  }
+
+  window.enviarSenal = async function() {
+    const btn = document.getElementById("btn-principal");
+    const fb  = document.getElementById("feedback-texto");
+    btn.disabled = true;
+
+    if (miRol === "tomador") {
+      await set(senalRef, { tipo: "pedir", para: "cebador" });
+      fb.textContent = "Señal enviada. El cebador ya sabe 🧉";
+    } else {
+      await set(senalRef, { tipo: "devolver", para: "tomador" });
+      fb.textContent = "Camión en camino. Esperá la devolución 🚛";
+    }
+
+    setTimeout(() => {
+      fb.textContent = "";
+      btn.disabled = false;
+    }, 3000);
+  };
+
+  function mostrarAlerta(emoji, titulo, desc) {
+    document.getElementById("alerta-emoji").textContent  = emoji;
+    document.getElementById("alerta-titulo").textContent = titulo;
+    document.getElementById("alerta-desc").textContent   = desc;
+    document.getElementById("alerta-overlay").classList.add("visible");
+  }
+
+  window.cerrarAlerta = function() {
+    document.getElementById("alerta-overlay").classList.remove("visible");
+  };
+
+  window.salir = async function() {
+    if (miRol) await set(ref(db, `roles/${miRol}`), null);
+    miRol = null;
+    document.getElementById("pantalla-main").style.display = "none";
+    document.getElementById("pantalla-rol").style.display  = "flex";
+    document.getElementById("msg-ocupado").textContent     = "";
+  };
+</script>
+</body>
+</html>
