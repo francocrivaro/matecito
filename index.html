@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🧉 Matecito</title>
+  <link rel="icon" type="image/png" href="LaCasaRadio Logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -260,9 +261,26 @@
       text-decoration: underline;
       margin-top: 1rem;
     }
+
+    /* logo esquina */
+    .logo-esquina {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+      z-index: 50;
+    }
+    .logo-esquina:hover { opacity: 1; }
   </style>
 </head>
 <body>
+
+<img src="LaCasaRadio Logo.png" alt="La Casa Radio" class="logo-esquina">
 
 <!-- PANTALLA ELEGIR ROL -->
 <div id="pantalla-rol">
